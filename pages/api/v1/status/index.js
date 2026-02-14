@@ -1,6 +1,6 @@
 import database from 'infra/database';
 
-async function status(req, res) {
+export default async function status(req, res) {
   const updatedAt = new Date().toISOString();
 
   const databaseVersion = await database.query({
@@ -28,5 +28,3 @@ async function status(req, res) {
     },
   });
 }
-
-export default status;
