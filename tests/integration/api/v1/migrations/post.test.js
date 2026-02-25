@@ -1,14 +1,8 @@
-import database from 'infra/database';
 import orquestrator from 'tests/orquestrator';
-
-async function clearDatabase() {
-  await database.query('drop schema public cascade; create schema public;');
-}
 
 beforeAll(async () => {
   await orquestrator.waitForAllServices();
-
-  return clearDatabase();
+  await orquestrator.clearDatabase();
 });
 
 describe('POST /api/v1/migrations', () => {
