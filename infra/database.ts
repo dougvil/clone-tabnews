@@ -1,7 +1,7 @@
-import { Client } from 'pg';
+import { Client, QueryConfig, QueryResult } from 'pg';
 
-async function query(queryObject) {
-  let client;
+async function query(queryObject: QueryConfig | string): Promise<QueryResult> {
+  let client: Client | undefined;
 
   try {
     client = await getNewClient();
@@ -12,14 +12,16 @@ async function query(queryObject) {
     console.error(error);
     throw error;
   } finally {
-    await client.end();
+    await client?.end();
   }
 }
 
-async function getNewClient() {
+async function getNewClient(): Promise<Client> {
   const client = new Client({
     host: process.env.POSTGRES_HOST,
-    port: process.env.POSTGRES_PORT,
+    port: process.env.POSTGRES_PORT
+      ? parseInt(process.env.POSTGRES_PORT, 10)
+      : undefined,
     user: process.env.POSTGRES_USER,
     database: process.env.POSTGRES_DB,
     password: process.env.POSTGRES_PASSWORD,
@@ -36,11 +38,11 @@ const database = {
 
 export default database;
 
-function getSslValues() {
+function getSslValues(): boolean | { ca: string } {
   if (process.env.POSTGRES_CA) {
     return {
       ca: process.env.POSTGRES_CA,
     };
   }
-  return process.env.NODE_ENV === 'production' ? true : false;
+  return process.env.NODE_ENV === 'production';
 }

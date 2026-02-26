@@ -1,6 +1,23 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import database from 'infra/database';
 
-export default async function status(req, res) {
+type DatabaseStatus = {
+  version: string;
+  max_connections: number;
+  current_connections: number;
+};
+
+type StatusResponse = {
+  updated_at: string;
+  dependencies: {
+    database: DatabaseStatus;
+  };
+};
+
+export default async function status(
+  req: NextApiRequest,
+  res: NextApiResponse<StatusResponse>,
+) {
   const updatedAt = new Date().toISOString();
 
   const databaseVersion = await database.query({

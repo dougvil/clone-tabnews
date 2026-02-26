@@ -1,11 +1,14 @@
-import migrationRunner from 'node-pg-migrate';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { RunnerOption, runner as migrationRunner } from 'node-pg-migrate';
 import { join } from 'path';
-
 import database from 'infra/database';
 
-export default async function migrations(req, res) {
+export default async function migrations(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const allowedMethods = ['GET', 'POST'];
-  if (!allowedMethods.includes(req.method)) {
+  if (!allowedMethods.includes(req.method ?? '')) {
     return res.status(405).end();
   }
 
@@ -13,7 +16,7 @@ export default async function migrations(req, res) {
 
   try {
     dbClient = await database.getNewClient();
-    const defaultMigrationOptions = {
+    const defaultMigrationOptions: RunnerOption = {
       dbClient,
       dir: join(process.cwd(), 'infra', 'migrations'),
       dryRun: true,
@@ -44,6 +47,6 @@ export default async function migrations(req, res) {
       .json({ error: 'An error occurred while running migrations.' });
   } finally {
     console.log('Closing database connection');
-    await dbClient.end();
+    await dbClient?.end();
   }
 }
