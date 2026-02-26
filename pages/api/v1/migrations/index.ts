@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import migrationRunner, { RunnerOption } from 'node-pg-migrate';
+import { RunnerOption, runner as migrationRunner } from 'node-pg-migrate';
 import { join } from 'path';
 import database from 'infra/database';
 
