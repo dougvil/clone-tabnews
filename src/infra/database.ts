@@ -1,4 +1,5 @@
 import { Client, QueryConfig, QueryResult } from 'pg';
+import { ServiceError } from './errors';
 
 async function query(queryObject: QueryConfig | string): Promise<QueryResult> {
   let client: Client | undefined;
@@ -10,7 +11,7 @@ async function query(queryObject: QueryConfig | string): Promise<QueryResult> {
     return result;
   } catch (error) {
     console.error(error);
-    throw error;
+    throw new ServiceError({ message: 'Database query failed.', cause: error });
   } finally {
     await client?.end();
   }

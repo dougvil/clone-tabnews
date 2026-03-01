@@ -129,3 +129,26 @@ export class TooManyRequestsError extends Error {
     };
   }
 }
+
+export class ServiceError extends Error {
+  action: string;
+  statusCode: number;
+
+  constructor(options: { cause?: unknown; message?: string; action?: string }) {
+    super(options.message || 'Service error.', { cause: options.cause });
+    this.name = 'ServiceError';
+    this.action =
+      options.action ||
+      'Support has been notified of the issue and is working on a fix.';
+    this.statusCode = 503;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      statusCode: this.statusCode,
+    };
+  }
+}
