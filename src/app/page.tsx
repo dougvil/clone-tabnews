@@ -1,4 +1,4 @@
-function Home() {
+export default function Home() {
   return (
     <h1>
       Oi, meu amor! Obrigado por ser minha parceira de vida! Amo você e a nossa
@@ -6,5 +6,3 @@ function Home() {
     </h1>
   );
 }
-
-export default Home;

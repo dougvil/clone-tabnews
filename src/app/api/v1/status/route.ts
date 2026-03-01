@@ -1,28 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import database from 'infra/database';
 import { InternalServerError } from 'infra/errors';
 
-type DatabaseStatus = {
-  version: string;
-  max_connections: number;
-  current_connections: number;
-};
-
-type StatusResponse = {
-  updated_at: string;
-  dependencies: {
-    database: DatabaseStatus;
-  };
-};
-
-type ErrorResponse = {
-  message: string;
-};
-
-export default async function status(
-  req: NextApiRequest,
-  res: NextApiResponse<StatusResponse | ErrorResponse>,
-) {
+export async function GET() {
   try {
     const updatedAt = new Date().toISOString();
 
@@ -40,7 +20,7 @@ export default async function status(
       values: [databaseName],
     });
 
-    res.status(200).json({
+    return NextResponse.json({
       updated_at: updatedAt,
       dependencies: {
         database: {
@@ -53,6 +33,6 @@ export default async function status(
   } catch (error) {
     const publicErrorObject = new InternalServerError({ cause: error });
     console.error(publicErrorObject);
-    res.status(500).json(publicErrorObject);
+    return NextResponse.json(publicErrorObject, { status: 500 });
   }
 }
