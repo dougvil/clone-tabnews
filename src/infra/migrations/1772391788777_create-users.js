@@ -24,7 +24,10 @@ export const up = (pgm) => {
       unique: true,
     },
 
-    password: {},
+    password: {
+      type: 'varchar(255)',
+      notNull: true,
+    },
 
     // Timestamp with time zone is used to ensure that the created_at field is stored in a consistent format regardless of the server's time zone.
     created_at: {

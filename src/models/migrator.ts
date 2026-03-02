@@ -1,7 +1,7 @@
+import { join } from 'path';
+import { RunnerOption, runner as migrationRunner } from 'node-pg-migrate';
 import database from 'infra/database';
 import { InternalServerError } from 'infra/errors';
-import { RunnerOption, runner as migrationRunner } from 'node-pg-migrate';
-import { join } from 'path';
 
 const defaultMigrationOptions: Omit<RunnerOption, 'dbClient'> = {
   dir: join(process.cwd(), 'src', 'infra', 'migrations'),
@@ -11,7 +11,7 @@ const defaultMigrationOptions: Omit<RunnerOption, 'dbClient'> = {
   migrationsTable: 'pgmigrations',
 };
 
-export async function listPendingMigrations() {
+async function listPendingMigrations() {
   let dbClient;
   try {
     dbClient = await database.getNewClient();
@@ -29,7 +29,7 @@ export async function listPendingMigrations() {
   }
 }
 
-export async function runPendingMigrations() {
+async function runPendingMigrations() {
   let dbClient;
 
   try {
@@ -53,3 +53,10 @@ export async function runPendingMigrations() {
     await dbClient?.end();
   }
 }
+
+const migrator = {
+  listPendingMigrations,
+  runPendingMigrations,
+};
+
+export default migrator;
