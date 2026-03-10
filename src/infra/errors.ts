@@ -60,7 +60,7 @@ export class ForbiddenError extends BaseError {
 
 export class NotFoundError extends BaseError {
   constructor(options: { cause?: unknown; message?: string; action?: string }) {
-    super({ cause: options.cause });
+    super({ message: options.message, cause: options.cause });
     this.name = 'NotFoundError';
     this.action =
       options.action ||

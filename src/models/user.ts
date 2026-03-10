@@ -1,5 +1,7 @@
+import argon2 from 'argon2';
 import database from 'infra/database';
-import { ValidationError } from 'infra/errors';
+import { NotFoundError, ValidationError } from 'infra/errors';
+import { PublicUser } from 'types/api';
 import { z } from 'zod';
 
 const userSchema = z.object({
@@ -57,27 +59,51 @@ async function create(userInputValues: UserInput) {
   }
 
   async function runInsertQuery(userInputValues: UserInput) {
+    const passwordHash = await argon2.hash(userInputValues.password, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16, // 64 MiB
+      timeCost: 3,
+      parallelism: 2,
+    });
+
     const result = await database.query({
       text: `
       INSERT INTO
         users (username, email, password)
       VALUES
         (LOWER($1), LOWER($2), $3)
-      RETURNING *;
+      RETURNING id, username, email, created_at, updated_at;
     `,
-      values: [
-        userInputValues.username,
-        userInputValues.email,
-        userInputValues.password,
-      ],
+      values: [userInputValues.username, userInputValues.email, passwordHash],
     });
     return result.rows[0];
   }
 }
 
+async function findByUsername(username: string): Promise<PublicUser> {
+  const result = await database.query({
+    text: `
+      SELECT id, username, email, created_at, updated_at
+      FROM users
+      WHERE LOWER(username) = LOWER($1);
+    `,
+    values: [username],
+  });
+
+  if (!result.rowCount) {
+    throw new NotFoundError({
+      message: 'Usuário não encontrado.',
+      action: 'Verifique se o username informado está correto.',
+    });
+  }
+
+  return result.rows[0] as PublicUser;
+}
+
 const userModel = {
   userSchema,
   create,
+  findByUsername,
 };
 
 export default userModel;
